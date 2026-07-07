@@ -2,12 +2,14 @@ interface HeaderProps {
   activeTab: 'data' | 'worklog';
   onTabChange: (tab: 'data' | 'worklog') => void;
   onResetToSeed: () => void;
+  onShowJsonModal: () => void;
 }
 
 export default function Header({
   activeTab,
   onTabChange,
   onResetToSeed,
+  onShowJsonModal,
 }: HeaderProps) {
   return (
     <header className="header">
@@ -30,9 +32,14 @@ export default function Header({
               AI Worklog
             </button>
           </nav>
-          <button className="btn-reset" onClick={onResetToSeed}>
-            Сбросить
-          </button>
+          <div className="header-buttons">
+            <button className="btn-json" onClick={onShowJsonModal}>
+              JSON
+            </button>
+            <button className="btn-reset" onClick={onResetToSeed}>
+              Сбросить к исходным данным
+            </button>
+          </div>
         </div>
       </div>
     </header>

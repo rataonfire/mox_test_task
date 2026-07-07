@@ -1,4 +1,4 @@
-import { pluralRu } from '../engine/format';
+import { pluralRu, round2 } from '../engine/format';
 import type { Estimate } from '../engine/types';
 
 interface EstimateCardProps {
@@ -25,8 +25,13 @@ export default function EstimateCard({ estimate }: EstimateCardProps) {
         <summary className="summary-label">почему?</summary>
         <div className="details-content">
           <p>
-            Итого {rabbits} {plural} = сумма по локациям с overlap discount{' '}
-            {(estimate.confidence.score / 100).toFixed(2)}
+            Складываем оценки по локациям:{' '}
+            {estimate.byLocation.map((l) => `«${l.location}» ≈ ${round2(l.estimate)}`).join(' + ')}{' '}
+            = {round2(estimate.rawEstimate)}, округляем до {rabbits}.
+          </p>
+          <p>
+            Вилка «от {range[0]} до {range[1]}» отражает уверенность ({estimate.confidence.score}%):
+            чем меньше уверенность, тем шире разброс.
           </p>
         </div>
       </details>

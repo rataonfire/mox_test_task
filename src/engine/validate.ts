@@ -29,7 +29,7 @@ export function validateImport(
   } catch {
     return {
       ok: false,
-      error: 'Невозможно распарсить JSON.',
+      error: 'Не удалось прочитать JSON — проверьте синтаксис (кавычки, запятые, скобки).',
     };
   }
 
