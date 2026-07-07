@@ -71,7 +71,7 @@ export default function SignalTable({
 
   return (
     <div className="signals-card">
-      <h2 className="card-title">Сигналы</h2>
+      <h2 className="card-title">Сигналы (данные для расчёта)</h2>
 
       <div className="signals-table-container">
         <table className="signals-table">

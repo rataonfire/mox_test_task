@@ -16,7 +16,7 @@ export default function ConfidenceGauge({ estimate }: ConfidenceGaugeProps) {
   return (
     <div className="card confidence-card">
       <div className="confidence-header">
-        <div className="confidence-label">{label}</div>
+        <div className="confidence-label">{label} уверенность</div>
         <div className="confidence-score">{score}%</div>
       </div>
       <div className="confidence-gauge-container">

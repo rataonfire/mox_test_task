@@ -154,8 +154,10 @@ body {
 
 .hero-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.3fr 1fr;
   gap: var(--spacing-lg);
+  border-bottom: 3px solid var(--color-accent);
+  padding-bottom: var(--spacing-lg);
 }
 
 /* Grid items default to min-width:auto, which lets the signal table's
@@ -188,9 +190,10 @@ body {
 
 .card-title {
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: 700;
   margin-bottom: var(--spacing-md);
   color: var(--color-text);
+  letter-spacing: 0.5px;
 }
 
 /* Estimate Card */
@@ -205,6 +208,11 @@ body {
     #f8fafc 100%
   );
   border: 2px solid var(--color-accent);
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.estimate-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
 .estimate-header {
@@ -250,10 +258,13 @@ body {
   color: var(--color-accent);
   font-weight: 600;
   list-style: none;
+  border-bottom: 2px dashed var(--color-accent);
+  cursor: pointer;
+  width: fit-content;
 }
 
 .summary-label:hover {
-  text-decoration: underline;
+  border-bottom-style: solid;
 }
 
 .summary-label::before {
@@ -400,7 +411,7 @@ details[open] > .summary-label::before {
 /* Location Grid */
 .location-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: var(--spacing-md);
 }
 
@@ -1092,6 +1103,21 @@ details[open] > .summary-label::before {
   .signals-table select {
     padding: 2px 4px;
     font-size: 12px;
+  }
+
+  .signals-table-container {
+    position: relative;
+  }
+
+  .signals-table-container::after {
+    content: '←';
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    pointer-events: none;
   }
 
   .modal-content {

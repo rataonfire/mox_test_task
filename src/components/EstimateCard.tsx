@@ -21,6 +21,12 @@ export default function EstimateCard({ estimate }: EstimateCardProps) {
       <div className="estimate-range">
         (от {range[0]} до {range[1]})
       </div>
+      <div className="estimate-context" style={{fontSize: "12px", color: "var(--color-text-secondary)", marginTop: "8px"}}>
+        {(() => {
+          const n = estimate.byLocation.reduce((sum, l) => sum + l.signals, 0);
+          return `на основе ${n} ${pluralRu(n, 'сигнала', 'сигналов', 'сигналов')}`;
+        })()}
+      </div>
       <details className="estimate-details">
         <summary className="summary-label">почему?</summary>
         <div className="details-content">
