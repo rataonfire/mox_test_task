@@ -778,7 +778,7 @@ If `confidence=0.62`, then `uncertaintyWidth ≈ 0.042 / 0.38 ≈ 0.11`
 
 ### File Structure (Final)
 ```
-C:\Users\rat\mox_test_task\
+<repo-root>/
 ├── src/
 │   ├── main.tsx
 │   ├── App.tsx
