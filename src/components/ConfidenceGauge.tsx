@@ -5,7 +5,7 @@ interface ConfidenceGaugeProps {
 }
 
 export default function ConfidenceGauge({ estimate }: ConfidenceGaugeProps) {
-  const { score, factors, explanation } = estimate.confidence;
+  const { score, label, factors, explanation } = estimate.confidence;
 
   const gaugeColor = (() => {
     if (score < 40) return '#EF4444';
@@ -13,16 +13,10 @@ export default function ConfidenceGauge({ estimate }: ConfidenceGaugeProps) {
     return '#10B981';
   })();
 
-  const labelText = (() => {
-    if (score < 40) return 'низкая';
-    if (score <= 70) return 'средняя';
-    return 'высокая';
-  })();
-
   return (
     <div className="card confidence-card">
       <div className="confidence-header">
-        <div className="confidence-label">{labelText}</div>
+        <div className="confidence-label">{label}</div>
         <div className="confidence-score">{score}%</div>
       </div>
       <div className="confidence-gauge-container">

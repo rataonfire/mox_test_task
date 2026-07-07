@@ -18,6 +18,7 @@ export default function SignalTable({
   onSignalToggle,
 }: SignalTableProps) {
   const [showAddForm, setShowAddForm] = useState(false);
+  const [formError, setFormError] = useState('');
   const [formData, setFormData] = useState<Partial<SignalEvent>>({
     event: 'motion_sensor',
     location: '',
@@ -31,14 +32,15 @@ export default function SignalTable({
   ).sort();
 
   const handleAddSignal = () => {
-    const maxId = signals
-      .map((s) => {
-        const match = s.id.match(/evt_(\d+)/);
-        return match ? parseInt(match[1], 10) : 0;
-      })
-      .reduce((a, b) => Math.max(a, b), 0);
+    // Validate location is not empty
+    if (!formData.location || formData.location.trim().length === 0) {
+      setFormError('Укажите локацию — без неё сигнал не попадёт в расчёт.');
+      return;
+    }
+    setFormError('');
 
-    const newId = `evt_${String(maxId + 1).padStart(3, '0')}`;
+    // Generate unique ID using UUID instead of regex-based increment
+    const newId = `evt_${crypto.randomUUID().slice(0, 8)}`;
 
     const newSignal: SignalEvent = {
       id: newId,
@@ -295,6 +297,7 @@ export default function SignalTable({
             </label>
           </div>
 
+          {formError && <p className="form-error">{formError}</p>}
           <div className="form-actions">
             <button className="btn-save" onClick={handleAddSignal}>
               Сохранить
@@ -303,6 +306,7 @@ export default function SignalTable({
               className="btn-cancel"
               onClick={() => {
                 setShowAddForm(false);
+                setFormError('');
                 setFormData({
                   event: 'motion_sensor',
                   location: '',

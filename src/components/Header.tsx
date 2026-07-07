@@ -34,7 +34,7 @@ export default function Header({
           </nav>
           <div className="header-buttons">
             <button className="btn-json" onClick={onShowJsonModal}>
-              JSON
+              Данные JSON
             </button>
             <button className="btn-reset" onClick={onResetToSeed}>
               Сбросить к исходным данным

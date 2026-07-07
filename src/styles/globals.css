@@ -654,6 +654,12 @@ details[open] > .summary-label::before {
   font-family: inherit;
 }
 
+.form-error {
+  color: var(--color-danger, #ef4444);
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-sm);
+}
+
 .form-actions {
   display: flex;
   gap: var(--spacing-md);

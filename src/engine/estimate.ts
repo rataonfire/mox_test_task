@@ -263,6 +263,9 @@ export function estimate(events: SignalEvent[], params: Params): Estimate {
   // Sort by value descending
   contributionsArray.sort((a, b) => b.value - a.value);
 
+  // Include only top 10 contributions in output
+  const topContributions = contributionsArray.slice(0, 10);
+
   // Build byLocation array with explanations
   const byLocationArray = Array.from(locationEstimates.values())
     .map((data) => {
@@ -331,7 +334,7 @@ export function estimate(events: SignalEvent[], params: Params): Estimate {
       factors,
       explanation: confidenceExplanation,
     },
-    contributions: contributionsArray,
+    contributions: topContributions,
     byLocation: byLocationArray,
     recommendations,
   };
