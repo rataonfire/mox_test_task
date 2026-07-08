@@ -1,0 +1,63 @@
+=== PURITY CHECKS (Phase 2) ===
+
+## A. Engine Purity: No impure operations in src/engine/
+
+Command: grep -rn "Date.now\|Math.random\|fetch(\|XMLHttpRequest\|setTimeout\|setInterval" src/engine/
+
+Result:
+(no output)
+
+Verdict: OK src/engine/ contains NO Date.now, Math.random, fetch, XMLHttpRequest, setTimeout, setInterval.
+Engine is pure and deterministic.
+
+## B. React imports in src/engine/
+
+Command: grep -rn "from 'react'\|from \"react\"" src/engine/
+
+Result:
+(no output)
+
+Verdict: OK src/engine/ imports nothing from React.
+Engine layer is framework-independent.
+
+## C. Hardcoded Model Math in Components & Hooks
+
+Search scope: src/components/ and src/hooks/
+Target: Re-derived model math (contribution formulas, confidence factors, thresholds used in LOGIC, not just display formatting)
+
+Patterns searched:
+  - "* 0.5" (intensity factor base)
+  - "intensity / 10" (intensity normalization)
+  - "* weight" or typeWeight variable usage
+  - Math.pow for discount
+  - "30 *" or "25 *" or "15 *" (confidence factors)
+  - Confidence label logic: < 40, >= 40, <= 70, > 70
+  - "0.5 + " (intensity formula)
+  - Division by 8, 5 (spec constants)
+
+=== GREP RESULTS ===
+✓ No impure ops in src/engine/
+
+=== COMPONENTS & HOOKS: Model Math Search ===
+
+Pattern: Intensity formula (0.5 + intensity/10)
+
+Pattern: Confidence thresholds (40, 70)
+src/components/ConfidenceGauge.tsx:11:    if (score < 40) return '#EF4444';
+src/components/ConfidenceGauge.tsx:12:    if (score <= 70) return '#F59E0B';
+
+Pattern: Confidence factors (30, 25, 15 multipliers)
+
+Pattern: Type weights (1.2, 0.5, 0.4, 0.3)
+src/components/ParamsPanel.tsx:90:                min="0.3"
+
+Pattern: Math.pow (overlap discount)
+  (no matches)
+
+Pattern: Label constants ('низкая', 'средняя', 'высокая') with logic
+
+=== CLASSIFICATION ===
+
+Any hits above containing LOGIC (if/switch to route by thresholds) = VIOLATION
+Hits in display-only context (formatting, percentage width, label assignment from engine result) = CONFORMANT
+

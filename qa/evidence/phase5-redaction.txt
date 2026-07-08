@@ -1,0 +1,7 @@
+=== Redaction sweep (repo + qa artifacts) Wed Jul  8 15:04:16 RTZST 2026 ===
+--- personal emails ---
+--- real home paths in tracked files ---
+--- repo hygiene ---
+tags_end
+7:🔗 Прод: [URL будет добавлено при деплое]
+// [DRAFT — human must edit before ship]

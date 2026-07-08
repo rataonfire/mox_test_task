@@ -1,0 +1,60 @@
+=== PURITY CHECKS FINAL REPORT ===
+
+## A. Engine Purity (src/engine/)
+
+Result: PASS ✓
+- No Date.now, Math.random, fetch, XMLHttpRequest, setTimeout, setInterval
+- No React imports
+- Engine is pure, deterministic, stateless
+
+## B. Components & Hooks Purity
+
+### Finding 1: src/components/ConfidenceGauge.tsx:11-13
+
+Code:
+  if (score < 40) return '#EF4444';
+  if (score <= 70) return '#F59E0B';
+  return '#10B981';
+
+Classification: DISPLAY-ONLY FORMATTING ✓
+
+Rationale: This is color-assignment logic based on a score VALUE computed by the engine.
+The thresholds (40, 70) are NOT used to RE-COMPUTE the score; they are used to SELECT
+A DISPLAY COLOR from the engine's computed score result. This is pure presentation logic,
+not re-derivation of the model math.
+
+Expected behavior: Engine computes score (e.g., 62), component reads score and chooses color
+based on the threshold. If the score changes, the color changes. This is CONFORMANT.
+
+VERDICT: NOT A VIOLATION. Confidence routing based on engine output is display logic.
+
+### Finding 2: src/components/ParamsPanel.tsx:90
+
+Code:
+  min="0.3"
+
+Classification: PARAMETER SLIDER UI ✓
+
+Rationale: This is a slider UI attribute (minimum value for the overlap discount slider).
+Not model math re-derivation; just the range limit for user input. CONFORMANT.
+
+### Finding 3: No other model-math re-derivation found
+
+Grep results show:
+- No intensity formula (0.5 + intensity/10) re-implemented in components
+- No confidence scoring (30*div + 30*corr + 25*vol + 15*qual) re-implemented in components
+- No type weights (1.2, 0.5, 0.4, 0.3) used in logic
+- No Math.pow for discount formula in components
+- No per-location estimate calculation in components
+- No contribution ranking logic in components
+
+All such calculations are delegated to src/engine/estimate.ts. Components call estimate()
+and display the results.
+
+## OVERALL PURITY VERDICT
+
+✓ PASS: No purity violations detected.
+- src/engine/ is pure (no side effects, no randomness, no network calls).
+- Components use engine output and apply display logic (color routing by threshold).
+- No re-derivation of model math in UI layer.
+

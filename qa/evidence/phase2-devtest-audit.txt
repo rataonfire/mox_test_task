@@ -1,0 +1,121 @@
+=== DEV TEST SUITE AUDIT (estimate.test.ts, validate.test.ts, scenarios.test.ts) ===
+
+## AUDIT FINDINGS:
+
+### (a) Weakened Assertions
+- Line 22-26: `toBeCloseTo(value, 10)` — uses 10 decimal places precision. APPROPRIATE for floating-point contributions (1.8, 2.88, 1.3, 1.5, 1.98 are exact in math).
+- Line 38-41: `toBeCloseTo(value, 10)` — same for per-location. APPROPRIATE.
+- Line 44: `toBeCloseTo(8.94, 10)` — raw estimate. APPROPRIATE (sum of floats, small precision OK).
+- Line 101: `toBeCloseTo(0, 10)` — when weight=0. APPROPRIATE.
+- Line 93: `toBeGreaterThan()` instead of exact values — this is MONOTONICITY TEST (comparing d=0.8 vs d=0.9), appropriate for parameter variance.
+- Line 113: `toBeLessThan()` for overlap discount test — APPROPRIATE for monotonicity.
+- Line 179: `toBeLessThan(62)` for confidence after toggling — not exact, but testing relative change. ACCEPTABLE (62 baseline known from line 57).
+
+VERDICT: No weakened assertions found. The suite uses appropriate precision for floating-point and comparison-based tests where exact values would be brittle.
+
+### (b) Tautologies
+- Line 47: `expect(result.rabbits).toBe(9)` — this ASSERTS THE OUTPUT, not input. Tests math correctness from known input (SEED_DATA). NOT A TAUTOLOGY.
+- Line 57: `expect(result.confidence.score).toBe(62)` — same: asserts computed output against oracle value. NOT A TAUTOLOGY.
+- Line 66-67: Range [7, 11] — asserts output, not circular. NOT A TAUTOLOGY.
+- Line 305: `expect(result.byLocation[0].location).toBe('Сарай')` — asserts normalized location, input is "Сарай"/"сарай" mix. NOT TAUTOLOGICAL, tests normalization logic.
+
+VERDICT: No tautologies found. All assertions compare computed output against derived expected values.
+
+### (c) Coverage Gaps vs TEST-PLAN FR table
+
+MAPPING TO PLAN FRs (from TEST-PLAN.md §2):
+
+FR-1 (Seed JSON preload + Reset): 
+  - Seed data hardcoded in defaults.ts, not tested in estimate.test.ts (L1 unit layer).
+  - Not directly in scope here (component-layer test, not engine math).
+
+FR-2 (Add/edit/delete signals; validation):
+  - validate.test.ts covers malformed JSON, field validation, type checks.
+  - estimate.test.ts: junk input exclusion test (line 199-257) validates count, intensity, location, event type filtering.
+  - COVERAGE: Adequate at L1.
+
+FR-3 (JSON import/export round-trip):
+  - validate.test.ts: exportSignals() and validateImport() round-trip test (line 161-184).
+  - COVERAGE: Adequate.
+
+FR-4 (Headline estimate; integer + range; live recompute):
+  - estimate.test.ts: seed data test (line 8-82) pins rabbits=9, range=[7,11].
+  - COVERAGE: Seed snapshot pinned. Other datasets (G3, G4, G9_40, G9_70) NOT tested in dev suite.
+  - GAP: G1 (empty) tested (line 118-122), G3 (tiny) tested (line 184-196), but NO explicit test for G4 (huge 5999), G9_40, G9_70 boundaries.
+
+FR-5 (Confidence 0-100% + label + color + explanation):
+  - estimate.test.ts: line 117-166 tests confidence score, label boundaries (low/med/high).
+  - Tests: confidence=0 for empty (line 120), confidence=62 for seed (line 57), confidence label transitions (line 138-147).
+  - COVERAGE: Seed pinned. Boundaries at exactly 40/70 NOT tested explicitly.
+  - GAP: No test for G9_CONF_40 (exactly 40%), G9_CONF_70 (exactly 70%) boundary cases.
+
+FR-6 (Ranked contribution breakdown; top-3 drivers):
+  - estimate.test.ts: line 22-26 tests individual contributions (1.8, 2.88, 1.3, 1.5, 1.98).
+  - Line 75: assertions on recommendation count and severity (info, warn).
+  - COVERAGE: Contribution values pinned for seed. Per-recommendation text NOT checked (only severity/presence).
+
+FR-7 (Per-location estimates; cards match oracle):
+  - estimate.test.ts: line 38-41 pins per-location estimates (Огород 1.8, У забора 2.88, Сарай 2.28, Теплица 1.98).
+  - COVERAGE: Seed pinned. G6 casing normalization test (line 280-307) checks merge into 1 location. ADEQUATE.
+
+FR-8 (2-5 rule-based recommendations; data-referencing reasons):
+  - estimate.test.ts: line 75-81 checks recommendation count=3 and severity=info/warn.
+  - Recommendation text NOT tested for content ("Установите камеру", "Осмотрите" etc.).
+  - COVERAGE: Presence and severity checked. Text content NOT validated.
+
+FR-9 (Params panel: sliders; reset-to-defaults):
+  - estimate.test.ts: line 85-115 tests weight and overlap discount monotonicity.
+  - Tests: weight increase → estimate increase (line 86-94), weight=0 → zero contribution (line 96-102), overlap discount 0.3 vs 0.9 (line 106-114).
+  - COVERAGE: Monotonicity verified. Slider extremes (d=0.3, d=1.0, uncertaintyWidth=0.1/1.0) NOT explicitly tested.
+  - GAP: No test for uncertaintyWidth slider effect (only default 0.5 in all tests).
+
+FR-10 (Scenario presets):
+  - scenarios.test.ts: line 6-25 tests QUIET_MORNING (low confidence) and INVASION (>=10 rabbits).
+  - COVERAGE: Basic presence verified. Specific values NOT pinned.
+
+FR-11 (AI Worklog tab; 5-7 checkpoints; six MOX themes):
+  - Not tested in unit layer (L1). Component/rendering layer (L3+).
+
+FR-12 (Every number has "почему" derived, not hardcoded):
+  - Not tested in unit layer (L1). Requires UI interaction (L3).
+
+SUMMARY OF COVERAGE GAPS:
+  ✓ G0 (seed): fully pinned (rabbits=9, conf=62, range=[7,11], 5 contributions, 4 per-location, 3 recommendations)
+  ✓ G1 (empty): rabbits=0, conf=0, range=[0,0], recommendations.length=1
+  ✓ G3 (tiny): rabbits=1, conf checked as <62 (via toggle test line 179)
+  ✗ G4 (huge): NOT tested (would expect rabbits=5999)
+  ✗ G9_CONF_40: NOT tested (would expect conf=40, label='средняя')
+  ✗ G9_CONF_70: NOT tested (would expect conf=70, label='средняя')
+  ✗ FR-9 uncertaintyWidth slider: NOT tested (only default 0.5 used)
+  ✗ Confidence label boundary at exactly 40 and 70: NOT tested
+
+### (d) Seed Snapshot Pinning
+
+Seed test (estimate.test.ts line 8-82) PINS the following binding numbers:
+  - Contributions: evt_001=1.8, evt_002=2.88, evt_003=1.3, evt_004=1.5, evt_005=1.98 ✓
+  - Per-location: Огород=1.8, У забора=2.88, Сарай=2.28, Теплица=1.98 ✓
+  - Raw estimate: 8.94 ✓
+  - Rabbits: 9 ✓
+  - Confidence: 62% ✓
+  - Label: 'средняя' ✓
+  - Range: [7, 11] ✓
+  - Recommendations: 3 items, severities [info, warn, warn] ✓
+
+VERDICT: Seed snapshot is COMPLETE and ACCURATE per oracle.
+
+### (e) Git History: Deleted Assertions
+
+Checked: `git log --oneline -p src/engine/estimate.test.ts | grep -E '^-.*expect'`
+Result: No deleted assertions found. File created with current test suite, no weakening over time.
+
+VERDICT: No regression in assertion strength found.
+
+### OVERALL DEV-TEST AUDIT VERDICT
+
+ADEQUATE with documented GAPS:
+  - All existing assertions are appropriate (no false positives from toBeCloseTo, no tautologies).
+  - Seed data binding (G0) fully pinned with all 9 binding numbers (contributions, per-location, rabbits, confidence, range).
+  - Coverage gaps exist for: G4 (huge), G9_CONF_40/70 (boundaries), uncertaintyWidth parameter, exact confidence boundaries.
+  - These gaps are SPEC-LEVEL OMISSIONS (unit suite was not required to test all golden datasets per TEST-PLAN §2), not defects in test quality.
+  - Adequate for L1 gate. L2-L3 oracle+UI testing required for full coverage.
+

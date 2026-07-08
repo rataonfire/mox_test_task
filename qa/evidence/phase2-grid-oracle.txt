@@ -1,0 +1,25 @@
+=== ORACLE CONVERGENCE GRID ===
+
+G0 (defaults):
+  rabbits=9, confidence=62%, label=средняя, range=[7, 11]
+  locations: {"Огород":1.8,"У забора":2.88,"Сарай":2.2800000000000002,"Теплица":1.98}
+G0 (d=0.3):
+  rabbits=9, confidence=62%, label=средняя, range=[7, 11]
+  locations: {"Огород":1.8,"У забора":2.88,"Сарай":1.8900000000000001,"Теплица":1.98}
+G0 (d=1.0):
+  rabbits=9, confidence=62%, label=средняя, range=[7, 11]
+  locations: {"Огород":1.8,"У забора":2.88,"Сарай":2.8,"Теплица":1.98}
+G1 (empty):
+  rabbits=0, confidence=0%, label=низкая, range=[0, 0]
+G3 (single tiny):
+  rabbits=1, confidence=11%, label=низкая, range=[0, 2]
+  locations: {"Test":0.18}
+G4 (huge):
+  rabbits=5999, confidence=24%, label=низкая, range=[3719, 8279]
+  locations: {"Huge":5999.400000000001}
+G9_40 (confidence=40):
+  rabbits=4, confidence=40%, label=средняя, range=[2, 6]
+  locations: {"L1":0.44000000000000006,"L2":0.44000000000000006,"L3":0.44000000000000006,"L4":0.44000000000000006,"L5":0.44000000000000006,"L6":0.44000000000000006,"L7":0.44000000000000006,"L8":0.44000000000000006}
+G9_70 (confidence=70):
+  rabbits=3, confidence=70%, label=средняя, range=[2, 4]
+  locations: {"L1":2.1052799999999996,"L2":0.4,"L3":0.4,"L4":0.4}
