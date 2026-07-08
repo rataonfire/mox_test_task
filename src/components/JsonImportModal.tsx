@@ -41,7 +41,6 @@ export default function JsonImportModal({
     onImport(result.signals);
     setImportText('');
 
-    // Close after a short delay to show success
     setTimeout(() => {
       handleClose();
     }, 800);
@@ -53,7 +52,7 @@ export default function JsonImportModal({
       await navigator.clipboard.writeText(json);
       alert('Скопировано в буфер обмена');
     } catch {
-      // Fallback: select text manually
+
       const textarea = document.getElementById(
         'export-textarea'
       ) as HTMLTextAreaElement;
@@ -99,20 +98,11 @@ export default function JsonImportModal({
                 id="export-textarea"
                 readOnly
                 value={exportSignals(currentSignals)}
-                style={{
-                  width: '100%',
-                  height: '300px',
-                  padding: '8px',
-                  fontFamily: 'monospace',
-                  fontSize: '12px',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: 'var(--radius)',
-                }}
+                className="modal-textarea"
               />
               <button
-                className="btn-primary"
+                className="btn-primary modal-button-margin"
                 onClick={handleExportCopy}
-                style={{ marginTop: '12px' }}
               >
                 Скопировать
               </button>
@@ -130,15 +120,7 @@ export default function JsonImportModal({
                   setImportWarnings([]);
                 }}
                 placeholder='[{"id": "evt_001", "event": "missing_carrot", ...}]'
-                style={{
-                  width: '100%',
-                  height: '300px',
-                  padding: '8px',
-                  fontFamily: 'monospace',
-                  fontSize: '12px',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: 'var(--radius)',
-                }}
+                className="modal-textarea"
               />
 
               {importError && (
@@ -159,10 +141,9 @@ export default function JsonImportModal({
               )}
 
               <button
-                className="btn-primary"
+                className="btn-primary modal-button-margin"
                 onClick={handleImport}
                 disabled={!importText.trim()}
-                style={{ marginTop: '12px' }}
               >
                 Загрузить
               </button>

@@ -10,7 +10,6 @@ export function useFarmState() {
   const [params, setParams] = useState<Params>(DEFAULT_PARAMS);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Load from localStorage on mount
   useEffect(() => {
     try {
       const savedSignals = localStorage.getItem(SIGNALS_KEY);
@@ -30,11 +29,10 @@ export function useFarmState() {
         }
       }
     } catch {
-      // Silent fallback to defaults
+
     }
   }, []);
 
-  // Debounced save to localStorage
   useEffect(() => {
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
@@ -45,7 +43,7 @@ export function useFarmState() {
         localStorage.setItem(SIGNALS_KEY, JSON.stringify(signals));
         localStorage.setItem(PARAMS_KEY, JSON.stringify(params));
       } catch {
-        // Silent failure on localStorage quota exceeded or disabled
+
       }
     }, 300);
 

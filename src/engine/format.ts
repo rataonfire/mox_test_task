@@ -1,7 +1,3 @@
-// Formatting helpers shared by the engine and (later) the UI.
-// Keeping them here preserves the "UI has zero math" convention.
-
-/** Russian plural form: pluralRu(2, 'сигнал', 'сигнала', 'сигналов') -> 'сигнала' */
 export function pluralRu(n: number, one: string, few: string, many: string): string {
   const mod10 = Math.abs(n) % 10;
   const mod100 = Math.abs(n) % 100;
@@ -10,7 +6,6 @@ export function pluralRu(n: number, one: string, few: string, many: string): str
   return many;
 }
 
-/** Round to 2 decimals for display inside generated explanations. */
 export function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }

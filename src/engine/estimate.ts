@@ -8,22 +8,19 @@ function isActiveSignal(signal: SignalEvent): boolean {
 }
 
 function isValidSignal(signal: SignalEvent): boolean {
-  // Check count: finite number >= 0
+
   if (!Number.isFinite(signal.count) || signal.count < 0) {
     return false;
   }
 
-  // Check intensity: finite number within 1..10
   if (!Number.isFinite(signal.intensity) || signal.intensity < 1 || signal.intensity > 10) {
     return false;
   }
 
-  // Check location: non-empty after trim
   if (typeof signal.location !== 'string' || signal.location.trim() === '') {
     return false;
   }
 
-  // Check event type
   const validTypes = ['missing_carrot', 'new_hole', 'motion_sensor', 'rustle_detected', 'footprints'];
   if (!validTypes.includes(signal.event)) {
     return false;
@@ -33,10 +30,9 @@ function isValidSignal(signal: SignalEvent): boolean {
 }
 
 export function estimate(events: SignalEvent[], params: Params): Estimate {
-  // Filter active and valid signals
+
   const activeSignals = events.filter((e) => isActiveSignal(e) && isValidSignal(e));
 
-  // Calculate contributions
   const contributions = activeSignals.map((signal) => {
     const weight = params.typeWeights[signal.event];
     const intensityFactor = 0.5 + signal.intensity / 10;
@@ -49,7 +45,6 @@ export function estimate(events: SignalEvent[], params: Params): Estimate {
     };
   });
 
-  // Group by location and calculate per-location estimates
   const locationMap = new Map<
     string,
     {
@@ -72,7 +67,6 @@ export function estimate(events: SignalEvent[], params: Params): Estimate {
     locationMap.get(key)!.contributions.push(value);
   }
 
-  // Calculate location estimates using discount formula
   const locationEstimates = new Map<
     string,
     {
@@ -83,10 +77,9 @@ export function estimate(events: SignalEvent[], params: Params): Estimate {
   >();
 
   for (const [key, { displayName, contributions: locContributions }] of locationMap) {
-    // Sort contributions descending
+
     const sorted = [...locContributions].sort((a, b) => b - a);
 
-    // Apply discount formula: c1 + c2*d + c3*d^2 + ...
     let locEstimate = 0;
     for (let i = 0; i < sorted.length; i++) {
       const discount = Math.pow(params.overlapDiscount, i);
@@ -104,19 +97,16 @@ export function estimate(events: SignalEvent[], params: Params): Estimate {
     });
   }
 
-  // Calculate raw estimate
   const rawEstimate = Array.from(locationEstimates.values()).reduce(
     (sum, data) => sum + data.estimate,
     0,
   );
 
-  // Calculate rabbits count
   let rabbits = Math.round(rawEstimate);
   if (rabbits === 0 && activeSignals.length > 0) {
     rabbits = 1;
   }
 
-  // Calculate confidence
   const distinctEventTypes = new Set(activeSignals.map((s) => s.event)).size;
   const locationsWithMultipleSignals = Array.from(locationEstimates.values()).filter(
     (data) => data.signals.length >= 2,
@@ -144,7 +134,6 @@ export function estimate(events: SignalEvent[], params: Params): Estimate {
     confidenceLabel = 'высокая';
   }
 
-  // Build factors
   const factorNames = ['Разнообразие улик', 'Перекрёстные сигналы', 'Объём наблюдений', 'Чёткость сигналов'];
   const factorWeights = [0.3, 0.3, 0.25, 0.15];
   const factorScores = [
@@ -156,7 +145,6 @@ export function estimate(events: SignalEvent[], params: Params): Estimate {
 
   const factors: Factor[] = [];
 
-  // Diversity factor explanation
   const diversityExp = `${distinctEventTypes} ${pluralRu(distinctEventTypes, 'тип', 'типа', 'типов')} улик из 5.`;
   factors.push({
     name: factorNames[0],
@@ -165,7 +153,6 @@ export function estimate(events: SignalEvent[], params: Params): Estimate {
     explanation: diversityExp,
   });
 
-  // Corroboration factor explanation
   const corroborationExp = `${locationsWithMultipleSignals} ${pluralRu(locationsWithMultipleSignals, 'локация', 'локации', 'локаций')} из ${locationsWithAnySignals} с двумя и более сигналами.`;
   factors.push({
     name: factorNames[1],
@@ -174,7 +161,6 @@ export function estimate(events: SignalEvent[], params: Params): Estimate {
     explanation: corroborationExp,
   });
 
-  // Volume factor explanation
   const volumeExp = `${activeSignals.length} ${pluralRu(activeSignals.length, 'наблюдение', 'наблюдения', 'наблюдений')} из 8 желаемых.`;
   factors.push({
     name: factorNames[2],
@@ -183,7 +169,6 @@ export function estimate(events: SignalEvent[], params: Params): Estimate {
     explanation: volumeExp,
   });
 
-  // Quality factor explanation
   const qualityExp = `средняя интенсивность ${meanIntensity.toFixed(1)} из 10.`;
   factors.push({
     name: factorNames[3],
@@ -192,7 +177,6 @@ export function estimate(events: SignalEvent[], params: Params): Estimate {
     explanation: qualityExp,
   });
 
-  // Confidence explanation: top-2 factors by weight * score
   const factorContributions = factors.map((f) => ({
     factor: f,
     contribution: (f.weight * f.score) / 100,
@@ -211,7 +195,6 @@ export function estimate(events: SignalEvent[], params: Params): Estimate {
     confidenceExplanation = `Основной вклад в оценку: ${top2Text}.`;
   }
 
-  // Calculate range
   let low = 0;
   let high = 0;
 
@@ -223,7 +206,6 @@ export function estimate(events: SignalEvent[], params: Params): Estimate {
     low = Math.floor(rabbits * (1 - w));
     high = Math.ceil(rabbits * (1 + w));
 
-    // Enforce minimum width when rabbits >= 1
     if (rabbits >= 1) {
       if (low > rabbits - 1) {
         low = rabbits - 1;
@@ -233,13 +215,11 @@ export function estimate(events: SignalEvent[], params: Params): Estimate {
       }
     }
 
-    // Clamp low >= 0
     if (low < 0) {
       low = 0;
     }
   }
 
-  // Build contributions array with explanations
   const contributionsArray = activeSignals.map((signal) => {
     const contrib = contributions.find((c) => c.signalId === signal.id);
     const value = contrib!.value;
@@ -260,20 +240,16 @@ export function estimate(events: SignalEvent[], params: Params): Estimate {
     };
   });
 
-  // Sort by value descending
   contributionsArray.sort((a, b) => b.value - a.value);
 
-  // Include only top 10 contributions in output
   const topContributions = contributionsArray.slice(0, 10);
 
-  // Build byLocation array with explanations
   const byLocationArray = Array.from(locationEstimates.values())
     .map((data) => {
       const signals = data.signals;
       const estimate = data.estimate;
       const roundedEstimate = Math.round(estimate * 100) / 100;
 
-      // Generate explanation based on contributions at this location
       const locContributions = contributions.filter((c) =>
         signals.some((s) => s.id === c.signalId),
       );
@@ -304,7 +280,6 @@ export function estimate(events: SignalEvent[], params: Params): Estimate {
     })
     .sort((a, b) => b.estimate - a.estimate);
 
-  // Generate recommendations
   const byLocationMapForRec = new Map(
     Array.from(locationEstimates.entries()).map(([key, data]) => [
       key,

@@ -54,7 +54,6 @@ export function validateImport(
       };
     }
 
-    // Check required fields
     if (!('id' in item)) {
       return {
         ok: false,
@@ -92,7 +91,6 @@ export function validateImport(
       };
     }
 
-    // Validate types and values
     if (typeof item.id !== 'string') {
       return {
         ok: false,
@@ -135,7 +133,6 @@ export function validateImport(
       };
     }
 
-    // Handle active field (optional)
     let active: boolean | undefined;
     if ('active' in item) {
       if (typeof item.active !== 'boolean') {
@@ -147,7 +144,6 @@ export function validateImport(
       active = item.active;
     }
 
-    // Check for duplicate ids
     let id = item.id;
     if (seenIds.has(id)) {
       const newId = `${id}_${signals.length}`;
@@ -190,7 +186,6 @@ export function exportSignals(signals: SignalEvent[]): string {
       time: signal.time,
     };
 
-    // Only include active if it's false
     if (signal.active === false) {
       obj.active = false;
     }

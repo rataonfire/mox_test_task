@@ -8,13 +8,6 @@ describe('estimate engine', () => {
     it('should produce exact numbers from seed data', () => {
       const result = estimate(SEED_DATA, DEFAULT_PARAMS);
 
-      // Check contributions (unrounded raw values)
-      // evt_001: 5 * 0.4 * (0.5 + 4/10) = 5 * 0.4 * 0.9 = 1.8
-      // evt_002: 2 * 1.2 * (0.5 + 7/10) = 2 * 1.2 * 1.2 = 2.88
-      // evt_003: 1 * 1.0 * (0.5 + 8/10) = 1 * 1.0 * 1.3 = 1.3
-      // evt_004: 3 * 0.5 * (0.5 + 5/10) = 3 * 0.5 * 1.0 = 1.5
-      // evt_005: 6 * 0.3 * (0.5 + 6/10) = 6 * 0.3 * 1.1 = 1.98
-
       const contribMap = Object.fromEntries(
         result.contributions.map((c) => [c.signalId, c.value]),
       );
@@ -25,12 +18,6 @@ describe('estimate engine', () => {
       expect(contribMap['evt_004']).toBeCloseTo(1.5, 10);
       expect(contribMap['evt_005']).toBeCloseTo(1.98, 10);
 
-      // Check byLocation estimates (descending)
-      // У забора: 2.88 (only evt_002)
-      // Сарай: 1.5 + 1.3*0.6 = 1.5 + 0.78 = 2.28
-      // Теплица: 1.98 (only evt_005)
-      // Огород: 1.8 (only evt_001)
-
       const locMap = Object.fromEntries(
         result.byLocation.map((l) => [l.location, l.estimate]),
       );
@@ -40,37 +27,15 @@ describe('estimate engine', () => {
       expect(locMap['Теплица']).toBeCloseTo(1.98, 10);
       expect(locMap['Огород']).toBeCloseTo(1.8, 10);
 
-      // Raw estimate: 2.88 + 2.28 + 1.98 + 1.8 = 8.94
       expect(result.rawEstimate).toBeCloseTo(8.94, 10);
 
-      // Rabbits: round(8.94) = 9
       expect(result.rabbits).toBe(9);
-
-      // Confidence score
-      // diversity = 5/5 = 1.0 (all 5 event types) -> score 100
-      // corroboration = 1/4 = 0.25 (only Сарай has 2+ signals) -> score 25
-      // volume = min(5/8, 1) = 0.625 -> score 62.5 (clamped to 62 after round: actually 25)
-      // quality = (4+7+8+5+6)/5 / 10 = 6.0/10 = 0.6 -> score 90 (actually 15)
-      // scoreRaw = 30*1.0 + 30*0.25 + 25*0.625 + 15*0.6 = 30 + 7.5 + 15.625 + 9 = 62.125
-      // score = round(62.125) = 62
 
       expect(result.confidence.score).toBe(62);
       expect(result.confidence.label).toBe('средняя');
 
-      // Range calculation
-      // w = (1 - 62.125/100) * 0.5 = 0.37875 * 0.5 = 0.189375
-      // low = floor(9 * (1 - 0.189375)) = floor(9 * 0.810625) = floor(7.2956) = 7
-      // high = ceil(9 * (1 + 0.189375)) = ceil(9 * 1.189375) = ceil(10.704) = 11
-      // min width check: 7 <= 9-1 ✓ (7 <= 8), 11 >= 9+1 ✓ (11 >= 10)
-
       expect(result.range[0]).toBe(7);
       expect(result.range[1]).toBe(11);
-
-      // Recommendations: should have exactly 3
-      // 1. Hotspot: У забора
-      // 2. New hole warn
-      // 3. Missing carrot warn
-      // (no low-confidence since 62 >= 40, no invasion since 9 < 10)
 
       expect(result.recommendations).toHaveLength(3);
       expect(result.recommendations[0].severity).toBe('info');
@@ -172,10 +137,8 @@ describe('estimate engine', () => {
 
       const result = estimate(toggled, DEFAULT_PARAMS);
 
-      // rawEstimate: 8.94 - 2.88 = 6.06 -> rabbits = 6
       expect(result.rabbits).toBe(6);
 
-      // confidence should be lower than 62
       expect(result.confidence.score).toBeLessThan(62);
     });
   });
@@ -190,7 +153,7 @@ describe('estimate engine', () => {
         intensity: 1,
         time: '12:00',
       };
-      // 1 * 0.3 * (0.5 + 1/10) = 1 * 0.3 * 0.6 = 0.18 -> round = 0, but min 1
+
       const result = estimate([signal], DEFAULT_PARAMS);
       expect(result.rabbits).toBe(1);
     });
@@ -251,7 +214,6 @@ describe('estimate engine', () => {
 
       const result = estimate(junk, DEFAULT_PARAMS);
 
-      // Should only count 'good'
       expect(result.contributions).toHaveLength(1);
       expect(result.contributions[0].signalId).toBe('good');
     });
@@ -300,7 +262,6 @@ describe('estimate engine', () => {
 
       const result = estimate(signals, DEFAULT_PARAMS);
 
-      // Should have only one byLocation entry
       expect(result.byLocation).toHaveLength(1);
       expect(result.byLocation[0].location).toBe('Сарай');
       expect(result.byLocation[0].signals).toBe(2);

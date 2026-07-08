@@ -1,6 +1,6 @@
 import type { SignalEvent, Params, Recommendation } from './types';
 
-export interface RecommendationContext {
+interface RecommendationContext {
   activeSignals: SignalEvent[];
   rabbits: number;
   confidence: number;
@@ -18,7 +18,6 @@ export interface RecommendationContext {
 export function generateRecommendations(context: RecommendationContext): Recommendation[] {
   const recommendations: Recommendation[] = [];
 
-  // No signals case
   if (context.activeSignals.length === 0) {
     recommendations.push({
       text: 'Сигналов нет. Либо кроликов нет, либо они стали ещё невидимее — проверьте датчики.',
@@ -28,7 +27,6 @@ export function generateRecommendations(context: RecommendationContext): Recomme
     return recommendations;
   }
 
-  // 1. Hotspot: location with max estimate
   let maxEstimate = -1;
   let hotspotName = '';
   let hotspotSignals = 0;
@@ -50,7 +48,6 @@ export function generateRecommendations(context: RecommendationContext): Recomme
     });
   }
 
-  // 2. New holes warning
   const newHoleLocations = new Set<string>();
   let newHoleCount = 0;
 
@@ -72,7 +69,6 @@ export function generateRecommendations(context: RecommendationContext): Recomme
     });
   }
 
-  // 3. Missing carrot warning
   let totalMissingCarrot = 0;
   const missingCarrotLocations = new Set<string>();
 
@@ -96,7 +92,6 @@ export function generateRecommendations(context: RecommendationContext): Recomme
     });
   }
 
-  // 4. Low confidence warning
   if (context.confidence < context.params.lowConfidenceThreshold) {
     recommendations.push({
       text: 'Оценка ненадёжна — добавьте датчики или наблюдения.',
@@ -105,7 +100,6 @@ export function generateRecommendations(context: RecommendationContext): Recomme
     });
   }
 
-  // 5. Invasion alert
   if (context.rabbits >= 10) {
     recommendations.push({
       text: 'Похоже на нашествие: усильте периметр и пересчитайте запасы моркови.',
@@ -114,6 +108,5 @@ export function generateRecommendations(context: RecommendationContext): Recomme
     });
   }
 
-  // Return max 5 recommendations, keeping priority order
   return recommendations.slice(0, 5);
 }

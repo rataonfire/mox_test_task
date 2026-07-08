@@ -32,14 +32,13 @@ export default function SignalTable({
   ).sort();
 
   const handleAddSignal = () => {
-    // Validate location is not empty
+
     if (!formData.location || formData.location.trim().length === 0) {
       setFormError('Укажите локацию — без неё сигнал не попадёт в расчёт.');
       return;
     }
     setFormError('');
 
-    // Generate unique ID using UUID instead of regex-based increment
     const newId = `evt_${crypto.randomUUID().slice(0, 8)}`;
 
     const newSignal: SignalEvent = {
@@ -77,13 +76,13 @@ export default function SignalTable({
         <table className="signals-table">
           <thead>
             <tr>
-              <th style={{ width: '50px' }}>Вкл</th>
-              <th style={{ width: '120px' }}>Событие</th>
-              <th style={{ width: '120px' }}>Локация</th>
-              <th style={{ width: '70px' }}>Кол-во</th>
-              <th style={{ width: '100px' }}>Интенсив</th>
-              <th style={{ width: '80px' }}>Время</th>
-              <th style={{ width: '50px' }}>Удал</th>
+              <th className="signal-table-col-active">Вкл</th>
+              <th className="signal-table-col-event">Событие</th>
+              <th className="signal-table-col-location">Локация</th>
+              <th className="signal-table-col-count">Кол-во</th>
+              <th className="signal-table-col-intensity">Интенсив</th>
+              <th className="signal-table-col-time">Время</th>
+              <th className="signal-table-col-delete">Удал</th>
             </tr>
           </thead>
           <tbody>
@@ -106,11 +105,7 @@ export default function SignalTable({
                         event: e.target.value as EventType,
                       })
                     }
-                    style={{
-                      width: '100%',
-                      padding: '4px',
-                      fontSize: '14px',
-                    }}
+                    className="signal-table-input"
                   >
                     {Object.entries(EVENT_LABELS).map(([key, label]) => (
                       <option key={key} value={key}>
@@ -127,11 +122,7 @@ export default function SignalTable({
                       onSignalEdit(signal.id, { location: e.target.value })
                     }
                     list="locations-list"
-                    style={{
-                      width: '100%',
-                      padding: '4px',
-                      fontSize: '14px',
-                    }}
+                    className="signal-table-input"
                   />
                 </td>
                 <td>
@@ -145,15 +136,11 @@ export default function SignalTable({
                       if (isNaN(count) || count < 0) count = 0;
                       onSignalEdit(signal.id, { count });
                     }}
-                    style={{
-                      width: '100%',
-                      padding: '4px',
-                      fontSize: '14px',
-                    }}
+                    className="signal-table-input"
                   />
                 </td>
                 <td>
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <div className="intensity-control">
                     <input
                       type="range"
                       min="1"
@@ -166,7 +153,7 @@ export default function SignalTable({
                       }
                       style={{ flex: 1 }}
                     />
-                    <span style={{ width: '20px', textAlign: 'center' }}>
+                    <span className="intensity-value">
                       {signal.intensity}
                     </span>
                   </div>
@@ -178,11 +165,7 @@ export default function SignalTable({
                     onChange={(e) =>
                       onSignalEdit(signal.id, { time: e.target.value })
                     }
-                    style={{
-                      width: '100%',
-                      padding: '4px',
-                      fontSize: '14px',
-                    }}
+                    className="signal-table-input"
                   />
                 </td>
                 <td>

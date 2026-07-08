@@ -1,5 +1,4 @@
 import type { SignalEvent } from '../engine/types';
-import { DEFAULT_PARAMS, SEED_DATA } from '../engine/defaults';
 
 export const QUIET_MORNING: SignalEvent[] = [
   {
@@ -78,11 +77,3 @@ export const INVASION: SignalEvent[] = [
     time: '10:30',
   },
 ];
-
-export function getScenariosWithParams() {
-  return {
-    seed: { signals: SEED_DATA, params: DEFAULT_PARAMS },
-    quiet_morning: { signals: QUIET_MORNING, params: DEFAULT_PARAMS },
-    invasion: { signals: INVASION, params: DEFAULT_PARAMS },
-  };
-}

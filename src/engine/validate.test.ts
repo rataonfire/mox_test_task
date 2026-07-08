@@ -166,7 +166,7 @@ describe('validate', () => {
       expect(validated.ok).toBe(true);
       if (validated.ok) {
         expect(validated.signals).toHaveLength(SEED_DATA.length);
-        // Check that round-trip matches original
+
         for (let i = 0; i < SEED_DATA.length; i++) {
           const original = SEED_DATA[i];
           const roundTrip = validated.signals[i];
